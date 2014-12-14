@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
-  <meta name="author" content="Martin Jambon">
-  <meta name="dcterms.date" content="2014-09-29">
+  <meta name="author" content="December 12, 2014">
   <title>atdgen(1) user manual</title>
   <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,8 +32,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <body>
 <header>
 <h1 class="title">atdgen(1) user manual</h1>
-<h2 class="author">Martin Jambon</h2>
-<h3 class="date">September 29, 2014</h3>
+<h2 class="author">December 12, 2014</h2>
 </header>
 <nav id="TOC">
 <ul>
@@ -120,7 +118,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <p>Call <code>atdgen -help</code> for the full list of available options.</p>
 <h2 id="atdgen-json-example"><a href="#TOC">Atdgen-json example</a></h2>
 <pre><code>$ atdgen -t example.atd
-$ atdgen -j example.atd</code></pre>
+$ atdgen -j -j-std example.atd</code></pre>
 <p>Input file <code>example.atd</code>:</p>
 <pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> profile = {
   id : <span class="dt">string</span>;
@@ -518,8 +516,14 @@ $ atdgen -v example.atd</code></pre>
 <td style="text-align: left;">record</td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><code>('a * 'b)</code></td>
+<td style="text-align: left;"><code>('a * 'b)</code></td>
+<td style="text-align: left;">array</td>
 <td style="text-align: left;">tuple</td>
-<td style="text-align: left;">tuple</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>('a)</code></td>
+<td style="text-align: left;"><code>'a</code></td>
 <td style="text-align: left;">array</td>
 <td style="text-align: left;">tuple</td>
 </tr>
