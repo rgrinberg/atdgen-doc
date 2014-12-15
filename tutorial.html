@@ -60,11 +60,12 @@ code > span.er { color: #ff0000; font-weight: bold; }
 </ul></li>
 </ul>
 </nav>
+<p><a href="https://mjambon.github.io/atdgen-doc/">Home</a></p>
 <h1 id="what-is-atdgen"><a href="#TOC">What is atdgen?</a></h1>
 <p>Atdgen is a tool that derives OCaml boilerplate code from type definitions. Currently it provides support for:</p>
 <ul>
 <li><a href="http://json.org/">JSON</a> serialization and deserialization.</li>
-<li><a href="http://jambon.com/biniou-format.txt">Biniou</a> serialization and deserialization. Biniou is a binary format extensible like JSON but more compact and faster to process.</li>
+<li><a href="http://mjambon.com/biniou-format.txt">Biniou</a> serialization and deserialization. Biniou is a binary format extensible like JSON but more compact and faster to process.</li>
 <li>Convenience functions for creating and validating OCaml data.</li>
 </ul>
 <h1 id="what-are-the-advantages-of-atdgen"><a href="#TOC">What are the advantages of atdgen?</a></h1>
@@ -74,7 +75,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li>produces readable OCaml code that can be easily reviewed (<code>.ml</code> files).</li>
 <li>produces fast code, 3x faster than json-static.</li>
 <li>runs fast, keeping build times low.</li>
-<li>same ATD definitions can be used to generate code other than OCaml. See for instance <a href="https://github.com/MyLifeLabs/atdj">Atdj</a> which generates Java classes for JSON IO. Auto-generating GUI widgets from type definitions is another popular use of annotated type definitions. The implementation of such code generators is facilitated by the <a href="http://oss.wink.com/atd/"><code>atd</code></a> library.</li>
+<li>same ATD definitions can be used to generate code other than OCaml. See for instance <a href="https://github.com/esperco/atdj">atdj</a> which generates Java classes for JSON IO. Auto-generating GUI widgets from type definitions is another popular use of annotated type definitions. The implementation of such code generators is facilitated by the <a href="https://github.com/mjambon/atd"><code>atd</code></a> library.</li>
 </ul>
 <h1 id="prerequisites"><a href="#TOC">Prerequisites</a></h1>
 <p>This tutorial assumes that you are using atdgen version 1.5.0 or above. The following command tells you which version you are using:</p>
