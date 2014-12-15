@@ -36,6 +36,8 @@ code > span.er { color: #ff0000; font-weight: bold; }
 </header>
 <nav id="TOC">
 <ul>
+<li><a href="#name">Name</a></li>
+<li><a href="#synopsis">Synopsis</a></li>
 <li><a href="#introduction">Introduction</a><ul>
 <li><a href="#scope">Scope</a></li>
 <li><a href="#language-overview">Language overview</a></li>
@@ -48,9 +50,16 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#predefined-type-names">Predefined type names</a></li>
 <li><a href="#shared-values">Shared values</a></li>
 </ul></li>
+<li><a href="#see-also">See also</a></li>
 </ul>
 </nav>
 <p><a href="https://mjambon.github.io/atdgen-doc/">Home</a></p>
+<h1 id="name"><a href="#TOC">Name</a></h1>
+<p>atd - syntax for cross-language <strong>a</strong>djustable <strong>t</strong>ype <strong>d</strong>efinitions</p>
+<h1 id="synopsis"><a href="#TOC">Synopsis</a></h1>
+<p>atdcat [<em>infile</em><strong>.atd</strong>] [<em>options</em>...]</p>
+<p>atdcat <strong>-version</strong></p>
+<p>atdcat <strong>-help</strong></p>
 <h1 id="introduction"><a href="#TOC">Introduction</a></h1>
 <p>ATD stands for Adjustable Type Definitions.</p>
 <pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="co">(* This is a sample ATD file *)</span>
@@ -578,5 +587,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 }
 
 <span class="kw">type</span> graph = node shared &lt;share id=<span class="st">&quot;1&quot;</span>&gt; <span class="dt">list</span></code></pre>
+<h1 id="see-also"><a href="#TOC">See also</a></h1>
+<p><a href="atdgen">atdgen</a>(1)</p>
 </body>
 </html>
