@@ -804,10 +804,29 @@ clean:
 <p><code>omake clean</code> removes all the products of compilation including the <code>.mli</code> and <code>.ml</code> produced by <code>atdgen</code>.</p>
 <h3 id="gnu-make"><a href="#TOC">GNU Make</a></h3>
 <p>We provide <a href="https://github.com/mjambon/atdgen-make"><code>Atdgen.mk</code></a>, a generic makefile that defines the dependencies and rules for generating OCaml <code>.mli</code> and <code>.ml</code> files from <code>.atd</code> files containing type definitions. The <code>Atdgen.mk</code> file contains its own documentation.</p>
-<p>Here is a sample <code>Makefile</code> that takes advantage of <a href="http://mmottl.github.io/ocaml-makefile/"><code>OCamlMakefile</code></a>: ``` .PHONY: default default: opt</p>
-<p>ATDGEN_SOURCES = foo.atd bar.atd ATDGEN_FLAGS = -j-std include Atdgen.mk</p>
-<p>SOURCES = <br> foo_t.mli foo_t.ml foo_j.mli foo_j.ml <br> bar_t.mli bar_t.ml bar_j.mli bar_j.ml <br> hello.ml RESULT = hello PACKS = atdgen # &quot;include OCamlMakefile&quot; must come after defs for SOURCES, RESULT, PACKS, etc. include OCamlMakefile</p>
-<p>.PHONY: sources opt all sources: $(SOURCES) opt: sources $(MAKE) native-code all: sources $(MAKE) byte-code ```</p>
+<p>Here is a sample <code>Makefile</code> that takes advantage of <a href="http://mmottl.github.io/ocaml-makefile/"><code>OCamlMakefile</code></a>:</p>
+<pre><code>.PHONY: default
+default: opt
+
+ATDGEN_SOURCES = foo.atd bar.atd
+ATDGEN_FLAGS = -j-std
+include Atdgen.mk
+
+SOURCES = \
+  foo_t.mli foo_t.ml foo_j.mli foo_j.ml \
+  bar_t.mli bar_t.ml bar_j.mli bar_j.ml \
+  hello.ml
+RESULT = hello
+PACKS = atdgen
+# &quot;include OCamlMakefile&quot; must come after defs for SOURCES, RESULT, PACKS, etc.
+include OCamlMakefile
+
+.PHONY: sources opt all
+sources: $(SOURCES)
+opt: sources
+        $(MAKE) native-code
+all: sources
+        $(MAKE) byte-code</code></pre>
 <p><code>make</code> alone builds a native code executable from source files <code>foo.atd</code>, <code>bar.atd</code> and <code>hello.ml</code>. <code>make clean</code> removes generated files. <code>make all</code> builds a bytecode executable. In addition to <code>native-code</code>, <code>byte-code</code> and <code>clean</code>, <code>OCamlMakefile</code> provides a number of other targets and options which are documented in <code>OCamlMakefile</code>'s README.</p>
 <h3 id="ocamlbuild"><a href="#TOC">Ocamlbuild</a></h3>
 <p>Rule to add in <code>myocamlbuild.ml</code>:</p>
