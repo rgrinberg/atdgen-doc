@@ -882,11 +882,11 @@ $ atdgen -v example.atd</code></pre>
 <p>Position: on a record field name, for a field holding a variant type.</p>
 <p>Value: name of another JSON field which holds the string representing the constructor for the variant.</p>
 <p>Semantics: The type definition</p>
-<pre><code>type t = {
-  value &lt;json tag_field=&quot;kind&quot;&gt;: [ A | B &lt;json name=&quot;b&quot;&gt; of int ];
+<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> t = {
+  value &lt;json tag_field=<span class="st">&quot;kind&quot;</span>&gt;: [ <span class="dt">A</span> | <span class="dt">B</span> &lt;json name=<span class="st">&quot;b&quot;</span>&gt; <span class="kw">of</span> <span class="dt">int</span> ];
 }</code></pre>
 <p>covers JSON objects that have an extra field <code>kind</code> which holds either <code>&quot;A&quot;</code> or <code>&quot;b&quot;</code>. Valid JSON values of type <code>t</code> include <code>{ &quot;kind&quot;: &quot;A&quot; }</code> and <code>{ &quot;kind&quot;: &quot;b&quot;, &quot;value&quot;: 123 }</code>.</p>
-<p>Available since version 1.5.0.</p>
+<p>Available since atdgen 1.5.0 and yojson 1.2.0.</p>
 <h2 id="section-ocaml_biniou"><a href="#TOC">Section '<code>ocaml_biniou</code>'</a></h2>
 <p>Section <code>ocaml_biniou</code> takes precedence over section <code>ocaml</code> in Biniou mode (<code>-b</code>) for the following fields:</p>
 <ul>
