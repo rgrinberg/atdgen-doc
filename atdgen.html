@@ -81,9 +81,12 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#integers-1">Integers</a></li>
 <li><a href="#lists-and-arrays">Lists and arrays</a></li>
 <li><a href="#sum-types">Sum types</a></li>
-<li><a href="#shared-values">Shared values</a></li>
+<li><a href="#shared-values-obsolete">Shared values (obsolete)</a></li>
 </ul></li>
 <li><a href="#field-validator">Field '<code>validator</code>'</a></li>
+</ul></li>
+<li><a href="#section-json-1">Section '<code>json</code>'</a><ul>
+<li><a href="#field-tag_field">Field '<code>tag_field</code>'</a></li>
 </ul></li>
 <li><a href="#section-ocaml_biniou">Section '<code>ocaml_biniou</code>'</a></li>
 <li><a href="#section-ocaml_json-obsolete">Section '<code>ocaml_json</code>' (obsolete)</a></li>
@@ -849,7 +852,7 @@ $ atdgen -v example.atd</code></pre>
 <pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> fruit = [ <span class="dt">Apple</span> | <span class="dt">Orange</span> ] &lt;ocaml repr=<span class="st">&quot;classic&quot;</span>&gt;</code></pre>
 <p>translates to the following OCaml type definition:</p>
 <pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> fruit = <span class="dt">Apple</span> | <span class="dt">Orange</span></code></pre>
-<h4 id="shared-values"><a href="#TOC">Shared values</a></h4>
+<h4 id="shared-values-obsolete"><a href="#TOC">Shared values (obsolete)</a></h4>
 <p>Position: after a <code>shared</code> type</p>
 <p>This feature is obsolete and was last supported by atdgen 1.3.1.</p>
 <h3 id="field-validator"><a href="#TOC">Field '<code>validator</code>'</a></h3>
@@ -873,6 +876,17 @@ $ atdgen -v example.atd</code></pre>
   Point<span class="kw">.</span>validate p
   &amp;&amp; (<span class="kw">fun</span> x -&gt; x &gt; 0) p.x
   &amp;&amp; (<span class="kw">fun</span> x -&gt; x &gt; 0) p.y</code></pre>
+<h2 id="section-json-1"><a href="#TOC">Section '<code>json</code>'</a></h2>
+<h3 id="field-tag_field"><a href="#TOC">Field '<code>tag_field</code>'</a></h3>
+<p>This feature makes it possible to read JSON objects representing variants that use one field for the tag and another field for the untagged value of the specific type associated with that tag.</p>
+<p>Position: on a record field name, for a field holding a variant type.</p>
+<p>Value: name of another JSON field which holds the string representing the constructor for the variant.</p>
+<p>Semantics: The type definition</p>
+<pre><code>type t = {
+  value &lt;json tag_field=&quot;kind&quot;&gt;: [ A | B &lt;json name=&quot;b&quot;&gt; of int ];
+}</code></pre>
+<p>covers JSON objects that have an extra field <code>kind</code> which holds either <code>&quot;A&quot;</code> or <code>&quot;b&quot;</code>. Valid JSON values of type <code>t</code> include <code>{ &quot;kind&quot;: &quot;A&quot; }</code> and <code>{ &quot;kind&quot;: &quot;b&quot;, &quot;value&quot;: 123 }</code>.</p>
+<p>Available since version 1.5.0.</p>
 <h2 id="section-ocaml_biniou"><a href="#TOC">Section '<code>ocaml_biniou</code>'</a></h2>
 <p>Section <code>ocaml_biniou</code> takes precedence over section <code>ocaml</code> in Biniou mode (<code>-b</code>) for the following fields:</p>
 <ul>
