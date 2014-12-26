@@ -1237,11 +1237,11 @@ Dealing with untypable JSON
 
 Sometimes we have to deal with JSON data that cannot be described
 using type definitions. In such case, we can represent the data as its
-JSON syntax tree (AST), which lets the user inspect it at runtime.
+JSON abstract syntax tree (AST), which lets the user inspect it at runtime.
 
 Let's consider a list of JSON objects for which we don't know the type
 definitions, but somehow some other system knows how to deal with such
-data. Let's consider this example of JSON data:
+data. Here is such data:
 
 ```
 [
