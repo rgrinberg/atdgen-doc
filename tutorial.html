@@ -847,8 +847,8 @@ end</code></pre>
 <p>Flag to add in <code>_tags</code> file:</p>
 <pre><code>&lt;*.{ml,mli,byte,native}&gt;:package(atdgen),package(biniou)</code></pre>
 <h1 id="dealing-with-untypable-json"><a href="#TOC">Dealing with untypable JSON</a></h1>
-<p>Sometimes we have to deal with JSON data that cannot be described using type definitions. In such case, we can represent the data as its JSON syntax tree (AST), which lets the user inspect it at runtime.</p>
-<p>Let's consider a list of JSON objects for which we don't know the type definitions, but somehow some other system knows how to deal with such data. Let's consider this example of JSON data:</p>
+<p>Sometimes we have to deal with JSON data that cannot be described using type definitions. In such case, we can represent the data as its JSON abstract syntax tree (AST), which lets the user inspect it at runtime.</p>
+<p>Let's consider a list of JSON objects for which we don't know the type definitions, but somehow some other system knows how to deal with such data. Here is such data:</p>
 <pre><code>[
   {
     &quot;label&quot;: &quot;flower&quot;,
