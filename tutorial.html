@@ -58,6 +58,7 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <li><a href="#gnu-make">GNU Make</a></li>
 <li><a href="#ocamlbuild">Ocamlbuild</a></li>
 </ul></li>
+<li><a href="#dealing-with-untypable-json">Dealing with untypable JSON</a></li>
 </ul>
 </nav>
 <p><a href="https://mjambon.github.io/atdgen-doc/">Home</a></p>
@@ -845,5 +846,100 @@ all: sources
 end</code></pre>
 <p>Flag to add in <code>_tags</code> file:</p>
 <pre><code>&lt;*.{ml,mli,byte,native}&gt;:package(atdgen),package(biniou)</code></pre>
+<h1 id="dealing-with-untypable-json"><a href="#TOC">Dealing with untypable JSON</a></h1>
+<p>Sometimes we have to deal with JSON data that cannot be described using type definitions. In such case, we can represent the data as its JSON syntax tree (AST), which lets the user inspect it at runtime.</p>
+<p>Let's consider a list of JSON objects for which we don't know the type definitions, but somehow some other system knows how to deal with such data. Let's consider this example of JSON data:</p>
+<pre><code>[
+  {
+    &quot;label&quot;: &quot;flower&quot;,
+    &quot;value&quot;: {
+      &quot;petals&quot;: [12, 45, 83.5555],
+      &quot;water&quot;: &quot;a340bcf02e&quot;
+    }
+  },
+  {
+    &quot;label&quot;: &quot;flower&quot;,
+    &quot;value&quot;: {
+      &quot;petals&quot;: &quot;undefined&quot;,
+      &quot;fold&quot;: null,
+      &quot;water&quot;: 0
+    }
+  },
+  { &quot;labels&quot;: [&quot;fork&quot;, &quot;scissors&quot;],
+    &quot;value&quot;: [ 8, 8 ]
+  }
+]</code></pre>
+<p>Hopefully this means something for someone. We are going to assume that each object has a <code>value</code> field of an unknown type, and may have a field <code>label</code> or a field <code>labels</code> of type <code>string</code>:</p>
+<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="co">(* File untypable.atd *)</span>
+
+<span class="kw">type</span> json &lt;ocaml <span class="ot">module</span>=<span class="st">&quot;Yojson.Safe&quot;</span>&gt; = abstract
+  <span class="co">(* uses type Yojson.Safe.json,</span>
+<span class="co">     with the functions Yojson.Safe.write_json</span>
+<span class="co">     and Yojson.Safe.read_json *)</span>
+
+<span class="kw">type</span> obj_list = obj <span class="dt">list</span>
+
+<span class="kw">type</span> obj = {
+  ?label: <span class="dt">string</span> <span class="dt">option</span>;
+  ?labels: <span class="dt">string</span> <span class="dt">list</span> <span class="dt">option</span>;
+  value: json
+}</code></pre>
+<p>It is possible to give a different name than <code>json</code> to the type of the JSON AST, but then the name of the type used in the original module must be provided in the annotation, i.e.:</p>
+<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> raw_json &lt;ocaml <span class="ot">module</span>=<span class="st">&quot;Yojson.Safe&quot;</span> t=<span class="st">&quot;json&quot;</span>&gt; = abstract
+  <span class="co">(* uses type Yojson.Safe.json,</span>
+<span class="co">     with the functions Yojson.Safe.write_json</span>
+<span class="co">     and Yojson.Safe.read_json *)</span>
+
+<span class="kw">type</span> obj_list = obj <span class="dt">list</span>
+
+<span class="kw">type</span> obj = {
+  ?label: <span class="dt">string</span> <span class="dt">option</span>;
+  ?labels: <span class="dt">string</span> <span class="dt">list</span> <span class="dt">option</span>;
+  value: raw_json
+}</code></pre>
+<p>Compile the example with:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ atdgen -t untypable.atd
+$ atdgen -j -j-std untypable.atd
+$ ocamlfind ocamlc -a -o untypable.cma -package atdgen <span class="kw">\</span>
+    untypable_t.mli untypable_t.ml untypable_j.mli untypable_j.ml</code></pre>
+<p>Test the example with your favorite OCaml toplevel (<code>ocaml</code> or <code>utop</code>):</p>
+<pre class="sourceCode ocaml"><code class="sourceCode ocaml">$ utop
+# #use <span class="st">&quot;topfind&quot;</span>;;
+# #require <span class="st">&quot;atdgen&quot;</span>;;
+# #load <span class="st">&quot;untypable.cma&quot;</span>;;
+# Ag_util<span class="kw">.</span>Json<span class="kw">.</span>from_channel Untypable_j<span class="kw">.</span>read_obj_list stdin;;
+[
+  {
+    <span class="st">&quot;label&quot;</span>: <span class="st">&quot;flower&quot;</span>,
+    <span class="st">&quot;value&quot;</span>: {
+      <span class="st">&quot;petals&quot;</span>: [12, 45, 83.5555],
+      <span class="st">&quot;water&quot;</span>: <span class="st">&quot;a340bcf02e&quot;</span>
+    }
+  },
+  {
+    <span class="st">&quot;label&quot;</span>: <span class="st">&quot;flower&quot;</span>,
+    <span class="st">&quot;value&quot;</span>: {
+      <span class="st">&quot;petals&quot;</span>: <span class="st">&quot;undefined&quot;</span>,
+      <span class="st">&quot;fold&quot;</span>: null,
+      <span class="st">&quot;water&quot;</span>: 0
+    }
+  },
+  { <span class="st">&quot;labels&quot;</span>: [<span class="st">&quot;fork&quot;</span>, <span class="st">&quot;scissors&quot;</span>],
+    <span class="st">&quot;value&quot;</span>: [ 8, 8 ]
+  }
+]
+- : Untypable_t<span class="kw">.</span>obj_list =
+[{Untypable_t<span class="kw">.</span>label = <span class="dt">Some</span> <span class="st">&quot;flower&quot;</span>; labels = <span class="dt">None;</span>
+  value =
+   <span class="dt">`Assoc</span>
+     [(<span class="st">&quot;petals&quot;</span>, <span class="dt">`List</span> [<span class="dt">`Int</span> 12; <span class="dt">`Int</span> 45; <span class="dt">`Float</span> 83.5555]);
+      (<span class="st">&quot;water&quot;</span>, <span class="dt">`String</span> <span class="st">&quot;a340bcf02e&quot;</span>)]};
+ {Untypable_t<span class="kw">.</span>label = <span class="dt">Some</span> <span class="st">&quot;flower&quot;</span>; labels = <span class="dt">None;</span>
+  value =
+   <span class="dt">`Assoc</span> [(<span class="st">&quot;petals&quot;</span>, <span class="dt">`String</span> <span class="st">&quot;undefined&quot;</span>);
+           (<span class="st">&quot;fold&quot;</span>, <span class="dt">`Null</span>);
+           (<span class="st">&quot;water&quot;</span>, <span class="dt">`Int</span> 0)]};
+ {Untypable_t<span class="kw">.</span>label = <span class="dt">None;</span> labels = <span class="dt">Some</span> [<span class="st">&quot;fork&quot;</span>; <span class="st">&quot;scissors&quot;</span>];
+  value = <span class="dt">`List</span> [<span class="dt">`Int</span> 8; <span class="dt">`Int</span> 8]}]</code></pre>
 </body>
 </html>
