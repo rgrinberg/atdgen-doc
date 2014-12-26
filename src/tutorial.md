@@ -1230,3 +1230,130 @@ Flag to add in `_tags` file:
 ```
 <*.{ml,mli,byte,native}>:package(atdgen),package(biniou)
 ```
+
+
+Dealing with untypable JSON
+===========================
+
+Sometimes we have to deal with JSON data that cannot be described
+using type definitions. In such case, we can represent the data as its
+JSON syntax tree (AST), which lets the user inspect it at runtime.
+
+Let's consider a list of JSON objects for which we don't know the type
+definitions, but somehow some other system knows how to deal with such
+data. Let's consider this example of JSON data:
+
+```
+[
+  {
+    "label": "flower",
+    "value": {
+      "petals": [12, 45, 83.5555],
+      "water": "a340bcf02e"
+    }
+  },
+  {
+    "label": "flower",
+    "value": {
+      "petals": "undefined",
+      "fold": null,
+      "water": 0
+    }
+  },
+  { "labels": ["fork", "scissors"],
+    "value": [ 8, 8 ]
+  }
+]
+```
+
+Hopefully this means something for someone. We are going to assume
+that each object has a `value` field of an unknown type, and may have
+a field `label` or a field `labels` of type `string`:
+
+```ocaml
+(* File untypable.atd *)
+
+type json <ocaml module="Yojson.Safe"> = abstract
+  (* uses type Yojson.Safe.json,
+     with the functions Yojson.Safe.write_json
+     and Yojson.Safe.read_json *)
+
+type obj_list = obj list
+
+type obj = {
+  ?label: string option;
+  ?labels: string list option;
+  value: json
+}
+```
+
+It is possible to give a different name than `json` to the type
+of the JSON AST, but then the name of the type used in the original module
+must be provided in the annotation, i.e.:
+
+```ocaml
+type raw_json <ocaml module="Yojson.Safe" t="json"> = abstract
+  (* uses type Yojson.Safe.json,
+     with the functions Yojson.Safe.write_json
+     and Yojson.Safe.read_json *)
+
+type obj_list = obj list
+
+type obj = {
+  ?label: string option;
+  ?labels: string list option;
+  value: raw_json
+}
+```
+
+Compile the example with:
+
+```bash
+$ atdgen -t untypable.atd
+$ atdgen -j -j-std untypable.atd
+$ ocamlfind ocamlc -a -o untypable.cma -package atdgen \
+    untypable_t.mli untypable_t.ml untypable_j.mli untypable_j.ml
+```
+
+Test the example with your favorite OCaml toplevel (`ocaml` or `utop`):
+
+```ocaml
+$ utop
+# #use "topfind";;
+# #require "atdgen";;
+# #load "untypable.cma";;
+# Ag_util.Json.from_channel Untypable_j.read_obj_list stdin;;
+[
+  {
+    "label": "flower",
+    "value": {
+      "petals": [12, 45, 83.5555],
+      "water": "a340bcf02e"
+    }
+  },
+  {
+    "label": "flower",
+    "value": {
+      "petals": "undefined",
+      "fold": null,
+      "water": 0
+    }
+  },
+  { "labels": ["fork", "scissors"],
+    "value": [ 8, 8 ]
+  }
+]
+- : Untypable_t.obj_list =
+[{Untypable_t.label = Some "flower"; labels = None;
+  value =
+   `Assoc
+     [("petals", `List [`Int 12; `Int 45; `Float 83.5555]);
+      ("water", `String "a340bcf02e")]};
+ {Untypable_t.label = Some "flower"; labels = None;
+  value =
+   `Assoc [("petals", `String "undefined");
+           ("fold", `Null);
+           ("water", `Int 0)]};
+ {Untypable_t.label = None; labels = Some ["fork"; "scissors"];
+  value = `List [`Int 8; `Int 8]}]
+```
