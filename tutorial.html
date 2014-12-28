@@ -830,22 +830,7 @@ all: sources
         $(MAKE) byte-code</code></pre>
 <p><code>make</code> alone builds a native code executable from source files <code>foo.atd</code>, <code>bar.atd</code> and <code>hello.ml</code>. <code>make clean</code> removes generated files. <code>make all</code> builds a bytecode executable. In addition to <code>native-code</code>, <code>byte-code</code> and <code>clean</code>, <code>OCamlMakefile</code> provides a number of other targets and options which are documented in <code>OCamlMakefile</code>'s README.</p>
 <h3 id="ocamlbuild"><a href="#TOC">Ocamlbuild</a></h3>
-<p>Rule to add in <code>myocamlbuild.ml</code>:</p>
-<pre><code>let _ = dispatch begin function
-  | After_rules -&gt; rule &quot;atdgen: .atd -&gt; _t.ml*, _j.ml*&quot;
-      ~prods:[&quot;%_t.ml&quot;;&quot;%_t.mli&quot;;&quot;%_j.ml&quot;;&quot;%_j.mli&quot;;&quot;%_v.ml&quot;;&quot;%_v.mli&quot;;]
-      ~dep:&quot;%.atd&quot;
-      (fun env build -&gt;
-        let atdgen = &quot;atdgen&quot; in
-        Seq [
-          Cmd (S [A atdgen; A &quot;-t&quot;; P (env &quot;%.atd&quot;)]);
-          Cmd (S [A atdgen; A &quot;-j&quot;; A &quot;-j-std&quot;; P (env &quot;%.atd&quot;)]);
-          Cmd (S [A atdgen; A &quot;-v&quot;; P (env &quot;%.atd&quot;)]);
-        ]
-      );
-end</code></pre>
-<p>Flag to add in <code>_tags</code> file:</p>
-<pre><code>&lt;*.{ml,mli,byte,native}&gt;:package(atdgen),package(biniou)</code></pre>
+<p>There is an <a href="https://github.com/hcarty/ocamlbuild-plugins/blob/master/myatdgen.ml">atdgen plugin for ocamlbuild</a>.</p>
 <h1 id="dealing-with-untypable-json"><a href="#TOC">Dealing with untypable JSON</a></h1>
 <p>Sometimes we have to deal with JSON data that cannot be described using type definitions. In such case, we can represent the data as its JSON abstract syntax tree (AST), which lets the user inspect it at runtime.</p>
 <p>Let's consider a list of JSON objects for which we don't know the type definitions, but somehow some other system knows how to deal with such data. Here is such data:</p>
