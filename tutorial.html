@@ -354,7 +354,7 @@ pretty-printed value (with dictionary):
 </ul>
 <h1 id="data-validation"><a href="#TOC">Data validation</a></h1>
 <p>Atdgen can be used to produce data validators for all types defined in an ATD file, based on user-given validators specified only for certain types. A simple example is:</p>
-<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> t = <span class="dt">string</span> &lt;ocaml validator=<span class="st">&quot;fun s -&gt; String.length s &gt;= 8&quot;</span>&gt; <span class="dt">option</span></code></pre>
+<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> t = <span class="dt">string</span> &lt;ocaml valid=<span class="st">&quot;fun s -&gt; String.length s &gt;= 8&quot;</span>&gt; <span class="dt">option</span></code></pre>
 <p><code>atdgen -v</code> will produce something equivalent to the following implementation:</p>
 <pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">let</span> validate_t x =
   <span class="kw">match</span> x <span class="kw">with</span>
@@ -374,20 +374,20 @@ pretty-printed value (with dictionary):
 <li><code>Resume</code>: depends on <code>Resume_v</code>, uses the validators</li>
 </ul>
 <p>Type definitions are placed in <code>resume.atd</code>:</p>
-<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> text = <span class="dt">string</span> &lt;ocaml validator=<span class="st">&quot;Resume_util.validate_some_text&quot;</span>&gt;
+<pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> text = <span class="dt">string</span> &lt;ocaml valid=<span class="st">&quot;Resume_util.validate_some_text&quot;</span>&gt;
 
 <span class="kw">type</span> date = {
   year : <span class="dt">int</span>;
   month : <span class="dt">int</span>;
   day : <span class="dt">int</span>;
-} &lt;ocaml validator=<span class="st">&quot;Resume_util.validate_date&quot;</span>&gt;
+} &lt;ocaml valid=<span class="st">&quot;Resume_util.validate_date&quot;</span>&gt;
 
 <span class="kw">type</span> job = {
   company : text;
   title : text;
   start_date : date;
   ?end_date : date <span class="dt">option</span>;
-} &lt;ocaml validator=<span class="st">&quot;Resume_util.validate_job&quot;</span>&gt;
+} &lt;ocaml valid=<span class="st">&quot;Resume_util.validate_job&quot;</span>&gt;
 
 <span class="kw">type</span> work_experience = job <span class="dt">list</span></code></pre>
 <p><code>resume_util.ml</code> contains our handwritten validators:</p>
@@ -555,15 +555,15 @@ INVALID:
   ?description : <span class="dt">string</span> <span class="dt">option</span>;
   ~timeout &lt;ocaml default=<span class="st">&quot;10&quot;</span>&gt; : <span class="dt">int</span>;
   ~credentials : param <span class="dt">list</span>
-    &lt;ocaml validator=<span class="st">&quot;fun l -&gt;</span>
-<span class="st">                        l &lt;&gt; [] || failwith </span><span class="ch">\&quot;</span><span class="st">missing credentials</span><span class="ch">\&quot;</span><span class="st">&quot;</span>&gt;;
+    &lt;ocaml valid=<span class="st">&quot;fun l -&gt;</span>
+<span class="st">                    l &lt;&gt; [] || failwith </span><span class="ch">\&quot;</span><span class="st">missing credentials</span><span class="ch">\&quot;</span><span class="st">&quot;</span>&gt;;
 }
 
 <span class="kw">type</span> param = {
   name : <span class="dt">string</span>
-    &lt;ocaml validator=<span class="st">&quot;fun s -&gt; s &lt;&gt; </span><span class="ch">\&quot;\&quot;</span><span class="st">&quot;</span>&gt;;
+    &lt;ocaml valid=<span class="st">&quot;fun s -&gt; s &lt;&gt; </span><span class="ch">\&quot;\&quot;</span><span class="st">&quot;</span>&gt;;
   key : <span class="dt">string</span>
-    &lt;ocaml validator=<span class="st">&quot;fun s -&gt; String.length s = 16&quot;</span>&gt;;
+    &lt;ocaml valid=<span class="st">&quot;fun s -&gt; String.length s = 16&quot;</span>&gt;;
 }</code></pre>
 <p>Our program will perform the following actions:</p>
 <pre><code>$ ./config -template
@@ -579,15 +579,15 @@ type config = {
   ?description : string option;
   ~timeout &lt;ocaml default=&quot;10&quot;&gt; : int;
   ~credentials : param list
-    &lt;ocaml validator=&quot;fun l -&gt;
-                        l &lt;&gt; [] || failwith \&quot;missing credentials\&quot;&quot;&gt;;
+    &lt;ocaml valid=&quot;fun l -&gt;
+                    l &lt;&gt; [] || failwith \&quot;missing credentials\&quot;&quot;&gt;;
 }
 
 type param = {
   name : string
-    &lt;ocaml validator=&quot;fun s -&gt; s &lt;&gt; \&quot;\&quot;&quot;&gt;;
+    &lt;ocaml valid=&quot;fun s -&gt; s &lt;&gt; \&quot;\&quot;&quot;&gt;;
   key : string
-    &lt;ocaml validator=&quot;fun s -&gt; String.length s = 16&quot;&gt;;
+    &lt;ocaml valid=&quot;fun s -&gt; String.length s = 16&quot;&gt;;
 }
 
 $ cat sample-config.json
@@ -690,7 +690,7 @@ ocamlfind ocamlopt -o config \
     <span class="kw">try</span>
       <span class="co">(* Read config data structure from JSON file *)</span>
       <span class="kw">let</span> x = Ag_util<span class="kw">.</span>Json<span class="kw">.</span>from_file Config_j<span class="kw">.</span>read_config fname <span class="kw">in</span>
-      <span class="co">(* Call the validators specified by &lt;ocaml validator=...&gt; *)</span>
+      <span class="co">(* Call the validators specified by &lt;ocaml valid=...&gt; *)</span>
       <span class="kw">if</span> not (Config_v<span class="kw">.</span>validate_config x) <span class="kw">then</span>
         failwith <span class="st">&quot;Some fields are invalid&quot;</span>
       <span class="kw">else</span>
