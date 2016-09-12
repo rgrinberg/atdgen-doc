@@ -792,7 +792,7 @@ symbol or at the beginning of a tuple field.
 Values: any valid OCaml expression
 
 Semantics: specifies an explicit default value for a field of an
-OCaml record or tuple, allowing that field to be omitted.
+OCaml record or tuple, allowing that field to be omitted. Default strings must be escaped.
 
 Example:
 
@@ -802,6 +802,7 @@ type color = [ Black | White | Rgb of (int * int * int) ]
 type ford_t = {
   year : int;
   ~color <ocaml default="`Black"> : color;
+  ~name <ocaml default="\"Ford Model T\""> : string;
 }
 
 type point = (int * int * <ocaml default="0"> : int)
@@ -1312,6 +1313,36 @@ covers JSON objects that have an extra field `kind` which holds either
 
 Available since atdgen 1.5.0 and yojson 1.2.0.
 
+### Field '`untyped`' ###
+
+This flag enables parsing of arbitrary variants without prior knowledge
+of their type. It is useful for constructing flexible parsers for
+extensible serializations. `json untyped` is compatible with regular
+variants, `json tag_field` variants, default values, and implicit
+`tag_field` constructors.
+
+Position: on a variant constructor with argument type `string * json
+option` (at most one per variant type)
+
+Value: none, `true` or `false`
+
+Semantics: The type definition
+
+```ocaml
+type v = [
+  | A
+  | B <json name="b"> of int
+  | Unknown <json untyped> of (string * json option)
+]
+```
+
+will parse and print `"A"`, `["b", 0]`, `"foo"`, and `["bar", [null]]`
+in a regular variant context. In the `tag_field` type `t` context in the
+previous section, `v` will parse and print `{ "kind": "foo" }` and `{
+"kind": "bar", "value": [null] }` as well as the examples previously
+given.
+
+Available since atdgen 1.10.0 and atd 1.2.0.
 
 Section '`ocaml_biniou`'
 ------------------------
