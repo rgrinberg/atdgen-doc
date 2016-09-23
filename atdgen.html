@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <meta name="author" content="December 12, 2014">
+  <meta name="author" content="September 23, 2016">
   <title>atdgen(1) user manual</title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
@@ -52,7 +52,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <body>
 <header>
 <h1 class="title">atdgen(1) user manual</h1>
-<h2 class="author">December 12, 2014</h2>
+<h2 class="author">September 23, 2016</h2>
 </header>
 <nav id="TOC">
 <ul>
@@ -70,6 +70,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#section-json">Section '<code>json</code>'</a><ul>
 <li><a href="#field-name">Field '<code>name</code>'</a></li>
 <li><a href="#field-repr">Field '<code>repr</code>'</a></li>
+<li><a href="#field-tag_field">Field '<code>tag_field</code>'</a></li>
+<li><a href="#field-untyped">Field '<code>untyped</code>'</a></li>
 </ul></li>
 <li><a href="#section-biniou">Section '<code>biniou</code>'</a><ul>
 <li><a href="#field-repr-1">Field '<code>repr</code>'</a></li>
@@ -87,10 +89,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li><a href="#field-repr-2">Field '<code>repr</code>'</a></li>
 <li><a href="#field-valid">Field '<code>valid</code>'</a></li>
 <li><a href="#field-validator">Field '<code>validator</code>'</a></li>
-</ul></li>
-<li><a href="#section-json-1">Section '<code>json</code>'</a><ul>
-<li><a href="#field-tag_field">Field '<code>tag_field</code>'</a></li>
-<li><a href="#field-untyped">Field '<code>untyped</code>'</a></li>
 </ul></li>
 <li><a href="#section-ocaml_biniou">Section '<code>ocaml_biniou</code>'</a></li>
 <li><a href="#section-ocaml_json-obsolete">Section '<code>ocaml_json</code>' (obsolete)</a></li>
@@ -605,6 +603,28 @@ $ atdgen -v example.atd</code></pre>
 <p>Semantics: specifies a float value that must be rounded to the nearest integer and represented in JSON without a decimal point nor an exponent.</p>
 <p>Example:</p>
 <div class="sourceCode"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> unixtime = float &lt;json repr=<span class="st">&quot;int&quot;</span>&gt;</code></pre></div>
+<h3 id="field-tag_field">Field '<code>tag_field</code>'</h3>
+<p>This feature makes it possible to read JSON objects representing variants that use one field for the tag and another field for the untagged value of the specific type associated with that tag.</p>
+<p>Position: on a record field name, for a field holding a variant type.</p>
+<p>Value: name of another JSON field which holds the string representing the constructor for the variant.</p>
+<p>Semantics: The type definition</p>
+<div class="sourceCode"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> t = {
+  value &lt;json tag_field=<span class="st">&quot;kind&quot;</span>&gt;: [ <span class="dt">A</span> | <span class="dt">B</span> &lt;json name=<span class="st">&quot;b&quot;</span>&gt; <span class="kw">of</span> <span class="dt">int</span> ];
+}</code></pre></div>
+<p>covers JSON objects that have an extra field <code>kind</code> which holds either <code>&quot;A&quot;</code> or <code>&quot;b&quot;</code>. Valid JSON values of type <code>t</code> include <code>{ &quot;kind&quot;: &quot;A&quot; }</code> and <code>{ &quot;kind&quot;: &quot;b&quot;, &quot;value&quot;: 123 }</code>.</p>
+<p>Available since atdgen 1.5.0 and yojson 1.2.0.</p>
+<h3 id="field-untyped">Field '<code>untyped</code>'</h3>
+<p>This flag enables parsing of arbitrary variants without prior knowledge of their type. It is useful for constructing flexible parsers for extensible serializations. <code>json untyped</code> is compatible with regular variants, <code>json tag_field</code> variants, default values, and implicit <code>tag_field</code> constructors.</p>
+<p>Position: on a variant constructor with argument type <code>string * json option</code> (at most one per variant type)</p>
+<p>Value: none, <code>true</code> or <code>false</code></p>
+<p>Semantics: The type definition</p>
+<div class="sourceCode"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> v = [
+  | <span class="dt">A</span>
+  | <span class="dt">B</span> &lt;json name=<span class="st">&quot;b&quot;</span>&gt; <span class="kw">of</span> <span class="dt">int</span>
+  | <span class="dt">Unknown</span> &lt;json untyped&gt; <span class="kw">of</span> (<span class="dt">string</span> * json <span class="dt">option</span>)
+]</code></pre></div>
+<p>will parse and print <code>&quot;A&quot;</code>, <code>[&quot;b&quot;, 0]</code>, <code>&quot;foo&quot;</code>, and <code>[&quot;bar&quot;, [null]]</code> in a regular variant context. In the <code>tag_field</code> type <code>t</code> context in the previous section, <code>v</code> will parse and print <code>{ &quot;kind&quot;: &quot;foo&quot; }</code> and <code>{ &quot;kind&quot;: &quot;bar&quot;, &quot;value&quot;: [null] }</code> as well as the examples previously given.</p>
+<p>Available since atdgen 1.10.0 and atd 1.2.0.</p>
 <h2 id="section-biniou">Section '<code>biniou</code>'</h2>
 <h3 id="field-repr-1">Field '<code>repr</code>'</h3>
 <h4 id="integers">Integers</h4>
@@ -949,29 +969,6 @@ $ atdgen -v example.atd</code></pre>
       (Ag_util<span class="kw">.</span>Validation<span class="kw">.</span>string_of_error e)</code></pre></div>
 <p>results in printing:</p>
 <pre><code>Error: Validation error: Not a positive integer: 0; path = &lt;root&gt;.y</code></pre>
-<h2 id="section-json-1">Section '<code>json</code>'</h2>
-<h3 id="field-tag_field">Field '<code>tag_field</code>'</h3>
-<p>This feature makes it possible to read JSON objects representing variants that use one field for the tag and another field for the untagged value of the specific type associated with that tag.</p>
-<p>Position: on a record field name, for a field holding a variant type.</p>
-<p>Value: name of another JSON field which holds the string representing the constructor for the variant.</p>
-<p>Semantics: The type definition</p>
-<div class="sourceCode"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> t = {
-  value &lt;json tag_field=<span class="st">&quot;kind&quot;</span>&gt;: [ <span class="dt">A</span> | <span class="dt">B</span> &lt;json name=<span class="st">&quot;b&quot;</span>&gt; <span class="kw">of</span> <span class="dt">int</span> ];
-}</code></pre></div>
-<p>covers JSON objects that have an extra field <code>kind</code> which holds either <code>&quot;A&quot;</code> or <code>&quot;b&quot;</code>. Valid JSON values of type <code>t</code> include <code>{ &quot;kind&quot;: &quot;A&quot; }</code> and <code>{ &quot;kind&quot;: &quot;b&quot;, &quot;value&quot;: 123 }</code>.</p>
-<p>Available since atdgen 1.5.0 and yojson 1.2.0.</p>
-<h3 id="field-untyped">Field '<code>untyped</code>'</h3>
-<p>This flag enables parsing of arbitrary variants without prior knowledge of their type. It is useful for constructing flexible parsers for extensible serializations. <code>json untyped</code> is compatible with regular variants, <code>json tag_field</code> variants, default values, and implicit <code>tag_field</code> constructors.</p>
-<p>Position: on a variant constructor with argument type <code>string * json option</code> (at most one per variant type)</p>
-<p>Value: none, <code>true</code> or <code>false</code></p>
-<p>Semantics: The type definition</p>
-<div class="sourceCode"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="kw">type</span> v = [
-  | <span class="dt">A</span>
-  | <span class="dt">B</span> &lt;json name=<span class="st">&quot;b&quot;</span>&gt; <span class="kw">of</span> <span class="dt">int</span>
-  | <span class="dt">Unknown</span> &lt;json untyped&gt; <span class="kw">of</span> (<span class="dt">string</span> * json <span class="dt">option</span>)
-]</code></pre></div>
-<p>will parse and print <code>&quot;A&quot;</code>, <code>[&quot;b&quot;, 0]</code>, <code>&quot;foo&quot;</code>, and <code>[&quot;bar&quot;, [null]]</code> in a regular variant context. In the <code>tag_field</code> type <code>t</code> context in the previous section, <code>v</code> will parse and print <code>{ &quot;kind&quot;: &quot;foo&quot; }</code> and <code>{ &quot;kind&quot;: &quot;bar&quot;, &quot;value&quot;: [null] }</code> as well as the examples previously given.</p>
-<p>Available since atdgen 1.10.0 and atd 1.2.0.</p>
 <h2 id="section-ocaml_biniou">Section '<code>ocaml_biniou</code>'</h2>
 <p>Section <code>ocaml_biniou</code> takes precedence over section <code>ocaml</code> in Biniou mode (<code>-b</code>) for the following fields:</p>
 <ul>
